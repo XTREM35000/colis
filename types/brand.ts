@@ -1,4 +1,3 @@
-// types\brand.ts
 export interface BrandInfo {
   companyName: string;
   companyLogo: string;

@@ -8,7 +8,7 @@
     </div>
 
     <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
-      <UCard v-for="stat in stats" :key="stat.title">
+      <UCard v-for="stat in visibleStats" :key="stat.title">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600">{{ stat.title }}</p>
@@ -28,12 +28,11 @@
       </UCard>
     </div>
 
-    <UCard>
-      <template #header>
-        <h2 class="text-lg font-medium">Recent Activity</h2>
-      </template>
-      <p class="text-gray-600">Loading recent activities...</p>
-    </UCard>
+    <!-- Composants spécifiques au rôle -->
+    <ClientDashboard v-if="isClient" />
+    <AdminDashboard v-if="isAdmin" />
+    <OperatorDashboard v-if="isOperator" />
+    <FinancierDashboard v-if="isFinancier" />
   </div>
 </template>
 
@@ -41,34 +40,51 @@
 const auth = useAuth();
 const user = computed(() => auth.user);
 
-const stats = [
+// Vérification des rôles
+const isAdmin = computed(() => auth.hasRole(['superadmin', 'admin']));
+const isClient = computed(() => auth.hasRole('client'));
+const isOperator = computed(() => auth.hasRole('operateur'));
+const isFinancier = computed(() => auth.hasRole('financier'));
+
+// Statistiques de base
+const baseStats = [
   {
     title: 'Total Packages',
     value: '1,234',
     icon: 'i-lucide-package',
     trend: { value: 12, isPositive: true },
+    roles: ['superadmin', 'admin', 'client', 'operateur'],
   },
   {
     title: 'Active Deliveries',
     value: '156',
     icon: 'i-lucide-truck',
     trend: { value: 8, isPositive: true },
+    roles: ['superadmin', 'admin', 'operateur'],
   },
   {
     title: 'Total Revenue',
     value: '$45,678',
     icon: 'i-lucide-trending-up',
     trend: { value: 15, isPositive: true },
+    roles: ['superadmin', 'admin', 'financier'],
   },
   {
     title: 'Active Users',
     value: '892',
     icon: 'i-lucide-users',
     trend: { value: 3, isPositive: false },
+    roles: ['superadmin', 'admin'],
   },
 ];
 
+// Filtrer les statistiques selon le rôle
+const visibleStats = computed(() => {
+  return baseStats.filter(stat => {
+    return stat.roles.some(role => auth.hasRole(role));
+  });
+});
+
 definePageMeta({
   middleware: 'auth',
-});
-</script>
+});</script>
