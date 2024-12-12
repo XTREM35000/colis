@@ -32,7 +32,6 @@ const structure = {
     "package.json",
   ],
 };
-
 // Fonction pour créer un dossier
 const createDirectory = (dirPath) => {
   if (!fs.existsSync(dirPath)) {
